@@ -97,4 +97,6 @@ class EditesNgoController extends Controller
         DB::commit();
         return response()->json(['message' => __('app_translation.success')], 200);
     }
+
+   
 }
