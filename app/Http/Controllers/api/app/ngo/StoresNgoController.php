@@ -42,6 +42,12 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
+use App\Enums\Type\RepresenterTypeEnum;
+use App\Http\Requests\app\ngo\NgoRegisterRequest;
+use App\Http\Requests\app\ngo\NgoInitStoreRequest;
+use App\Repositories\Task\PendingTaskRepositoryInterface;
+
+
 class StoresNgoController extends Controller
 {
     protected $pendingTaskRepository;
@@ -55,9 +61,21 @@ class StoresNgoController extends Controller
         $validatedData = $request->validated();
         $authUser = $request->user();
         $locale = App::getLocale();
+        // Create email
+        $email = Email::where('value', '=', $validatedData['email'])->first();
+        if ($email) {
+            return response()->json([
+                'message' => __('app_translation.email_exist'),
+            ], 400, [], JSON_UNESCAPED_UNICODE);
+        }
+        $contact = Contact::where('value', '=', $validatedData['contact'])->first();
+        if ($contact) {
+            return response()->json([
+                'message' => __('app_translation.contact_exist'),
+            ], 400, [], JSON_UNESCAPED_UNICODE);
+        }
         // Begin transaction
         DB::beginTransaction();
-        // Create email
         $email = Email::create(['value' => $validatedData['email']]);
         $contact = Contact::create(['value' => $validatedData['contact']]);
         // Create address
@@ -103,8 +121,7 @@ class StoresNgoController extends Controller
         // **Fix agreement creation**
         $agreement = Agreement::create([
             'ngo_id' => $newNgo->id,
-            'start_date' => Carbon::now()->toDateString(),
-            'end_date' => Carbon::now()->addYear()->toDateString(),
+            "agreement_no" => ""
         ]);
         $agreement->agreement_no = "AG" . '-' . Carbon::now()->year . '-' . $agreement->id;
         $agreement->save();
@@ -166,14 +183,11 @@ class StoresNgoController extends Controller
 
     protected function storeRepresenter($request, $agreement_id, $ngo_id)
     {
-
-        $representer =  Representer::create(
-            [
-                'type' => RepresenterTypeEnum::ngo,
-                'represented_id' => $agreement_id,
-            ]
-        );
-
+        $representer =  Representer::create([
+            'type' => RepresenterTypeEnum::ngo,
+            'represented_id' => $agreement_id,
+            'user_id' => $request->user()->id,
+        ]);
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
             RepresenterTran::create([
                 'representer_id' => $representer->id,
@@ -366,7 +380,7 @@ class StoresNgoController extends Controller
 
         return null;
     }
-    protected function documentStore($request, $agreement_id, $ngo_id, $ngo_name)
+    protected function documentStore($request, $agreement_id, $ngo_id)
     {
 
 
@@ -426,26 +440,19 @@ class StoresNgoController extends Controller
 
     protected function representerDocumentStore($request, $agreement_id, $ngo_id)
     {
-
-
-
         $task = PendingTask::where('id', $request->pending_id)
             ->first();
-
 
         if (!$task) {
             return response()->json(['error' => __('app_translation.checklist_not_found')], 404);
         }
         // Get checklist IDs
 
-        $documents = PendingTaskDocument::select('size', 'path', 'acceptable_mimes', 'check_list_id', 'actual_name', 'extension')
+        $documents = PendingTaskDocument::select('size', 'path', 'check_list_id', 'actual_name', 'extension')
             ->where('pending_task_id', $task->id)
             ->first();
 
-
-
         $oldPath = storage_path("app/" . $documents->path); // Absolute path of temp file
-
         $newDirectory = storage_path() . "/app/private/ngos/{$ngo_id}/{$agreement_id}/{$documents->check_list_id}/";
 
         if (!file_exists($newDirectory)) {

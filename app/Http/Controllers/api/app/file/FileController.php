@@ -10,15 +10,12 @@ use App\Http\Controllers\Controller;
 use App\Models\AgreementDocument;
 use App\Models\CheckList;
 use App\Models\Document;
-use App\Models\Ngo;
 use App\Models\NgoTran;
 use App\Models\PendingTask;
-use App\Models\PendingTaskContent;
 use App\Models\PendingTaskDocument;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Pion\Laravel\ChunkUpload\Exceptions\UploadMissingFileException;
@@ -27,34 +24,6 @@ use Pion\Laravel\ChunkUpload\Receiver\FileReceiver;
 
 class FileController extends Controller
 {
-    /**
-     * Handles the file upload.
-     */
-
-    public function uploadFile(Request $request)
-    {
-        $receiver = new FileReceiver("file", $request, HandlerFactory::classFromRequest($request));
-
-        if (!$receiver->isUploaded()) {
-            throw new UploadMissingFileException();
-        }
-
-        $save = $receiver->receive();
-
-        if ($save->isFinished()) {
-
-            return $this->genSaveFile($save->getFile(), $request);
-        }
-
-        // If not finished, send current progress.
-        $handler = $save->handler();
-
-        return response()->json([
-            "done" => $handler->getPercentageDone(),
-            "status" => true,
-        ]);
-    }
-
     public function uploadNgoFile(Request $request)
     {
         $receiver = new FileReceiver("file", $request, HandlerFactory::classFromRequest($request));
@@ -80,7 +49,7 @@ class FileController extends Controller
         ]);
     }
 
-    public function uploadNgoFileBeforeStore(Request $request)
+    public function uploadFile(Request $request)
     {
         $receiver = new FileReceiver("file", $request, HandlerFactory::classFromRequest($request));
 
@@ -93,7 +62,7 @@ class FileController extends Controller
         if ($save->isFinished()) {
             $task_type = TaskTypeEnum::ngo_registeration;
             // $ngo_id = $request->ngo_id;
-            return $this->saveFileBeforeStore($save->getFile(), $request, $task_type);
+            return $this->singleFileStore($save->getFile(), $request, $task_type, CheckListEnum::representer_document->value);
         }
 
         // If not finished, send current progress.
@@ -204,7 +173,7 @@ class FileController extends Controller
      * Validate file using checklist settings.
      */
 
-    protected function saveFileBeforeStore(UploadedFile $file, Request $request, $task_type)
+    protected function singleFileStore(UploadedFile $file, Request $request, $task_type, $check_list_id)
     {
         $fileActualName = $file->getClientOriginalName();
         $fileName = $this->createFilename($file);
@@ -212,12 +181,10 @@ class FileController extends Controller
         $finalPath = $this->getTempFullPath();
         $mimetype = $file->getMimeType();
         $storePath = $this->getTempFilePath($fileName);
-        $extension = ".{$file->getClientOriginalExtension()}";
+        // $extension = ".{$file->getClientOriginalExtension()}";
 
 
         $file->move($finalPath, $fileName);
-
-
 
         $user = $request->user();
         $user_id = $user->id;
@@ -226,31 +193,25 @@ class FileController extends Controller
         $task = PendingTask::where('user_id', $user_id)
             ->where('user_type', $role)
             ->where('task_type', $task_type)
-            ->first();
+            ->delete();
 
-        if ($task) {
+        // if ($task) {
+        //     // PendingTaskDocument::where('pending_task_id', $task->id)->delete();
+        //     // PendingTaskContent::where('pending_task_id', $task->id)->delete();
+        //     $task->delete();
+        // }
 
-            PendingTaskDocument::where('pending_task_id', $task->id)->delete();
-            PendingTaskContent::where('pending_task_id', $task->id)->delete();
-
-            $task->delete();
-        }
-
-
-        $task =  PendingTask::create([
+        $task = PendingTask::create([
             'user_id' => $user_id,
             'user_type' => $role,
             'task_type' => $task_type,
-
-
         ]);
-
 
         $data = [
             "pending_id" => $task->id,
             "name" => $fileActualName,
             "size" => $fileSize,
-            "check_list_id" => CheckListEnum::representer_document,
+            "check_list_id" => $check_list_id,
             "extension" => $mimetype,
             "path" => $storePath,
         ];
@@ -310,7 +271,6 @@ class FileController extends Controller
                 'user_type' => $role,
                 'task_type' => $task_type,
                 'task_id' => $id
-
             ]);
         }
 
