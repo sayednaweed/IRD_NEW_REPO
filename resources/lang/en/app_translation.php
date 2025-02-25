@@ -32,7 +32,7 @@ return [
     "director_not_found" => "Director Not found.",
     "address_not_found" => "Address Not found.",
     "ngo_not_found" => "Ngo Not found.",
-    "agreement_exists" => "Agreement Exists",
+    "agreement_not_exists" => "Agreement Not Found",
     "ngo_trans_not_found" => "NGO Translation Not found.",
     "donor_not_found" => "Donor Not Found",
     "per_not_found" => "Permission Not Found",
@@ -40,4 +40,5 @@ return [
     "unauthorized_role_sub_per" => "You are not authorized, to assign this sub permission.",
     "job_not_found" => "Job Not Found",
     "checklist_type_not_found" => "CheckList Type Not Found",
+    "ngo_status_not_found" => "NGO Status Not Found"
 ];

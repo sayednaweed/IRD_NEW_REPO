@@ -18,11 +18,15 @@ enum SubPermissionEnum: int
     case setting_job = 22;
     case setting_destination = 23;
     case setting_checklist = 24;
+    case setting_news_type = 25;
+    case setting_priority = 26;
     public const SETTINGS = [
         21 => "language",
         22 => "job",
         23 => "destination",
         24 => "checklist",
+        25 => "news_type",
+        26 => "priority",
     ];
         // NGO
     case ngo_information = 52;

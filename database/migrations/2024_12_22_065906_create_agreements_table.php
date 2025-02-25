@@ -18,8 +18,8 @@ return new class extends Migration
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->string('agreement_no')->unique(); // Unique Agreement Number
-            $table->string('start_date');
-            $table->string('end_date');
+            $table->string('start_date')->nullable();
+            $table->string('end_date')->nullable();
             $table->timestamps();
         });
     }

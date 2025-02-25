@@ -32,7 +32,7 @@ return [
     "director_not_found" => "رئیس پیدا نشد",
     "address_not_found" => "آدرس پیدا نشد.",
     "ngo_not_found" => "موسسه یافت نشد.",
-    "agreement_exists" => "تعهد نام موجود است",
+    "agreement_not_exists" => "تعهد نامه یافت نشد",
     "ngo_trans_not_found" => "ترجمه موسسه یافت نشد.",
     "donor_not_found" => "دونر یافت نشد",
     "per_not_found" => "مجوز پیدا نشد",
@@ -40,4 +40,5 @@ return [
     "unauthorized_role_sub_per" => "شما مجاز به اختصاص این مجوز فرعی نیستید.",
     "job_not_found" => "شغل پیدا نشد",
     "checklist_type_not_found" => "نوع چک لیست یافت نشد",
+    "ngo_status_not_found" => "NGO Status Not Found"
 ];

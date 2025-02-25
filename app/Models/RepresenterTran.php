@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class RepresenterTran extends Model
 {
-    //
+    protected $guarded = [];
 }

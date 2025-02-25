@@ -70,7 +70,34 @@ class CheckListSeeder extends Seeder
 
     protected function ngoRegisterationCheckList()
     {
+<<<<<<< HEAD
 
+=======
+        $checklist = CheckList::create([
+            'id' => CheckListEnum::NgoDirectorNid,
+            'check_list_type_id' => CheckListTypeEnum::ngoRegister,
+            'acceptable_extensions' => "pdf,jpeg,jpg,png",
+            'acceptable_mimes' => ".pdf,.jpeg,.jpg,.png",
+            'description' => "",
+            'file_size' => 2048,
+            'user_id' => RoleEnum::super,
+        ]);
+        CheckListTrans::create([
+            'check_list_id' => $checklist->id,
+            'value' => "NGO Director National Identity or Passport",
+            'language_name' => LanguageEnum::default,
+        ]);
+        CheckListTrans::create([
+            'check_list_id' => $checklist->id,
+            'value' => "تذکره یا پاسپورت رئیس موسسه",
+            'language_name' => LanguageEnum::farsi,
+        ]);
+        CheckListTrans::create([
+            'check_list_id' => $checklist->id,
+            'value' => "د موسسه د رئیس تذکره یا پاسپورټ",
+            'language_name' => LanguageEnum::pashto,
+        ]);
+>>>>>>> c5cde79778fb8f65e451052c5e340f995b926763
         // 1.
         $checklist = CheckList::create([
             'id' => CheckListEnum::NgoDirectorNid,
@@ -115,7 +142,7 @@ class CheckListSeeder extends Seeder
         ]);
         CheckListTrans::create([
             'check_list_id' => $checklist->id,
-            'value' => "جواز کار کارگردان",
+            'value' => "جواز کار رئیس",
             'language_name' => LanguageEnum::farsi,
         ]);
         CheckListTrans::create([
@@ -177,7 +204,7 @@ class CheckListSeeder extends Seeder
         ]);
         // 4.
         $checklist = CheckList::create([
-            "id" => CheckListEnum::representer_document,
+            "id" => CheckListEnum::ngo_representor_letter,
             'check_list_type_id' => CheckListTypeEnum::ngoRegister,
             'acceptable_extensions' => "pdf,jpeg,jpg,png",
             'acceptable_mimes' => ".pdf,.jpeg,.jpg,.png",
@@ -187,7 +214,7 @@ class CheckListSeeder extends Seeder
         ]);
         CheckListTrans::create([
             'check_list_id' => $checklist->id,
-            'value' => "Represter introducation document",
+            'value' => "Representor introducation letter",
             'language_name' => LanguageEnum::default,
         ]);
         CheckListTrans::create([
@@ -197,7 +224,7 @@ class CheckListSeeder extends Seeder
         ]);
         CheckListTrans::create([
             'check_list_id' => $checklist->id,
-            'value' => "د استازی د معرفت مکتوب",
+            'value' => "د نماینده د معرفي لیک",
             'language_name' => LanguageEnum::pashto,
         ]);
         //5.
@@ -295,30 +322,6 @@ class CheckListSeeder extends Seeder
         CheckListTrans::create([
             'check_list_id' => $checklist->id,
             'value' => "لاسلیک شوی د نوم لیکنې فورمه (پښتو)",
-            'language_name' => LanguageEnum::pashto,
-        ]);
-        // 8.
-        $checklist = CheckList::create([
-            'check_list_type_id' => CheckListTypeEnum::ngoRegister,
-            'acceptable_extensions' => "pdf,jpeg,jpg,png",
-            'acceptable_mimes' => ".pdf,.jpeg,.jpg,.png",
-            'description' => "",
-            'file_size' => 4048,
-            'user_id' => RoleEnum::super,
-        ]);
-        CheckListTrans::create([
-            'check_list_id' => $checklist->id,
-            'value' => "Representative introduction letter",
-            'language_name' => LanguageEnum::default,
-        ]);
-        CheckListTrans::create([
-            'check_list_id' => $checklist->id,
-            'value' => "مکتوب معرفی نماینده",
-            'language_name' => LanguageEnum::farsi,
-        ]);
-        CheckListTrans::create([
-            'check_list_id' => $checklist->id,
-            'value' => "د نماینده د معرفي لیک",
             'language_name' => LanguageEnum::pashto,
         ]);
     }

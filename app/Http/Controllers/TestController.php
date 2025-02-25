@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\CheckListEnum;
 use Carbon\Carbon;
 use App\Models\Ngo;
 use App\Models\News;
 use App\Models\Role;
-
 use App\Models\User;
+
 use App\Models\Email;
 use App\Models\Staff;
-
 use App\Models\Gender;
+
 use App\Enums\RoleEnum;
 use App\Models\Address;
 use App\Models\Country;
@@ -30,6 +29,7 @@ use App\Models\AddressTran;
 use App\Models\NidTypeTrans;
 use Illuminate\Http\Request;
 use App\Enums\PermissionEnum;
+use App\Models\CheckListType;
 use Sway\Models\RefreshToken;
 use App\Models\RolePermission;
 use App\Models\StatusTypeTran;
@@ -39,14 +39,15 @@ use App\Enums\SubPermissionEnum;
 use App\Models\RolePermissionSub;
 use App\Enums\DestinationTypeEnum;
 use App\Enums\Type\StatusTypeEnum;
-use App\Models\CheckListType;
 use App\Models\PendingTaskContent;
 use Illuminate\Support\Facades\DB;
+use App\Models\PendingTaskDocument;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use App\Traits\Address\AddressTrait;
 use function Laravel\Prompts\select;
 
+use App\Enums\CheckList\CheckListEnum;
 use App\Repositories\ngo\NgoRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
 
@@ -66,6 +67,18 @@ class TestController extends Controller
     public function index(Request $request)
     {
         $locale = App::getLocale();
+
+        $exclude = [
+            CheckListEnum::ngo_representor_letter->value,
+            CheckListEnum::ngo_register_form_en->value,
+            CheckListEnum::ngo_register_form_fa->value,
+            CheckListEnum::ngo_register_form_ps->value,
+        ];
+        return $documents = PendingTaskDocument::join('check_lists', 'check_lists.id', 'pending_task_documents.check_list_id')
+            ->select('size', 'path', 'acceptable_mimes', 'check_list_id', 'actual_name', 'extension')
+            ->where('pending_task_id', 3)
+            // ->whereNotIn('check_lists.id', $exclude)
+            ->get();
 
         $id = 9;
         $checklist = DB::table('check_lists as cl')

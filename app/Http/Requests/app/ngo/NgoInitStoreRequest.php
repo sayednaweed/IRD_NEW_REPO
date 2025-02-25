@@ -65,9 +65,9 @@ class NgoInitStoreRequest extends FormRequest
             "area_pashto" => "required|max:128|min:5",
             "area_farsi" => "required|max:128|min:5",
             // director
-            "director_name_english" => "required|max:128|min:5",
-            "director_name_farsi"  => "required|max:128|min:5",
-            "director_name_pashto" => "required|max:128|min:5",
+            "director_name_english" => "required|max:128|min:3",
+            "director_name_farsi"  => "required|max:128|min:3",
+            "director_name_pashto" => "required|max:128|min:3",
             "surname_english" => "required|max:128|min:3",
             "surname_pashto" => "required|max:128|min:3",
             "surname_farsi" => "required|max:128|min:3",
@@ -95,13 +95,6 @@ class NgoInitStoreRequest extends FormRequest
             "objes_in_afg_english" =>  "required|min:5",
             "objes_in_afg_pashto" =>  "required|min:5",
             "objes_in_afg_farsi" =>  "required|min:5",
-            //checkList 
-            // 'checklistMap.*.check_list_id' => 'required|exists:check_lists,id',
-            // 'checklistMap.*.extension' => 'required|string|in:.pdf,.docx,.xlsx', // Allowed extensions
-
-
-
-
         ];
     }
 }
