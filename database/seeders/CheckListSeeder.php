@@ -70,34 +70,7 @@ class CheckListSeeder extends Seeder
 
     protected function ngoRegisterationCheckList()
     {
-<<<<<<< HEAD
 
-=======
-        $checklist = CheckList::create([
-            'id' => CheckListEnum::NgoDirectorNid,
-            'check_list_type_id' => CheckListTypeEnum::ngoRegister,
-            'acceptable_extensions' => "pdf,jpeg,jpg,png",
-            'acceptable_mimes' => ".pdf,.jpeg,.jpg,.png",
-            'description' => "",
-            'file_size' => 2048,
-            'user_id' => RoleEnum::super,
-        ]);
-        CheckListTrans::create([
-            'check_list_id' => $checklist->id,
-            'value' => "NGO Director National Identity or Passport",
-            'language_name' => LanguageEnum::default,
-        ]);
-        CheckListTrans::create([
-            'check_list_id' => $checklist->id,
-            'value' => "تذکره یا پاسپورت رئیس موسسه",
-            'language_name' => LanguageEnum::farsi,
-        ]);
-        CheckListTrans::create([
-            'check_list_id' => $checklist->id,
-            'value' => "د موسسه د رئیس تذکره یا پاسپورټ",
-            'language_name' => LanguageEnum::pashto,
-        ]);
->>>>>>> c5cde79778fb8f65e451052c5e340f995b926763
         // 1.
         $checklist = CheckList::create([
             'id' => CheckListEnum::NgoDirectorNid,

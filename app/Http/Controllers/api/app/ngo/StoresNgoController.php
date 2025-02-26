@@ -2,44 +2,45 @@
 
 namespace App\Http\Controllers\api\app\ngo;
 
-use Carbon\Carbon;
-use App\Models\Ngo;
-use App\Models\Email;
-use App\Enums\RoleEnum;
-use App\Models\Address;
-use App\Models\Contact;
-use App\Models\NgoTran;
-use App\Models\Director;
-use App\Models\Document;
-use App\Models\Agreement;
-use App\Models\CheckList;
-use App\Models\NgoStatus;
+use App\Enums\CheckList\CheckListEnum;
+use App\Enums\CheckListTypeEnum;
 use App\Enums\CountryEnum;
 use App\Enums\LanguageEnum;
-use App\Models\AddressTran;
-use App\Models\PendingTask;
-use App\Models\Representer;
-use App\Models\DirectorTran;
 use App\Enums\PermissionEnum;
-use App\Models\NgoPermission;
-use App\Models\CheckListTrans;
-use App\Models\StatusTypeTran;
-use App\Models\RepresenterTran;
-use App\Enums\CheckListTypeEnum;
+use App\Enums\RoleEnum;
+use App\Enums\Type\RepresenterTypeEnum;
+use App\Enums\Type\StatusTypeEnum;
 use App\Enums\Type\TaskTypeEnum;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\app\ngo\NgoInitStoreRequest;
+use App\Http\Requests\app\ngo\NgoRegisterRequest;
+use App\Models\Address;
+use App\Models\AddressTran;
+use App\Models\Agreement;
 use App\Models\AgreementDirector;
 use App\Models\AgreementDocument;
-use App\Enums\Type\StatusTypeEnum;
-use Illuminate\Support\Facades\DB;
+use App\Models\CheckList;
+use App\Models\CheckListTrans;
+use App\Models\Contact;
+use App\Models\Director;
+use App\Models\DirectorTran;
+use App\Models\Document;
+use App\Models\Email;
+use App\Models\Ngo;
+use App\Models\NgoPermission;
+use App\Models\NgoStatus;
+use App\Models\NgoTran;
+use App\Models\PendingTask;
 use App\Models\PendingTaskDocument;
-use Illuminate\Support\Facades\App;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
-use App\Enums\CheckList\CheckListEnum;
-use App\Enums\Type\RepresenterTypeEnum;
-use App\Http\Requests\app\ngo\NgoRegisterRequest;
-use App\Http\Requests\app\ngo\NgoInitStoreRequest;
+use App\Models\Representer;
+use App\Models\RepresenterTran;
+use App\Models\StatusTypeTran;
 use App\Repositories\Task\PendingTaskRepositoryInterface;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class StoresNgoController extends Controller
 {
@@ -374,10 +375,20 @@ class StoresNgoController extends Controller
     }
     protected function documentStore($request, $agreement_id, $ngo_id)
     {
-        $task = PendingTask::where('task_id', $request->pending_id)
+
+
+        $user = $request->user();
+        $user_id = $user->id;
+        $role = $user->role_id;
+        $task_type = TaskTypeEnum::ngo_registeration;
+
+        $task = PendingTask::where('user_id', $user_id)
+            ->where('user_type', $role)
+            ->where('task_type', $task_type)
+            ->where('task_id', $ngo_id)
             ->first();
         if (!$task) {
-            return response()->json(['error' => __('app_translation.checklist_not_found')], 404);
+            return response()->json(['error' => __('app_translation.checklist_not_found' . 'pending taks___' . $request->pending_id)], 404);
         }
         // Get checklist IDs
         $documents = PendingTaskDocument::join('check_lists', 'check_lists.id', 'pending_task_documents.check_list_id')
@@ -408,6 +419,7 @@ class StoresNgoController extends Controller
                 return response()->json(['error' => __('app_translation.not_found') . $oldPath], 404);
             }
 
+            Log::info('Global Exception =>' . 'pass the move file');
 
             $document = Document::create([
                 'actual_name' => $checklist['actual_name'],
@@ -473,6 +485,9 @@ class StoresNgoController extends Controller
             'document_id' => $document->id,
             'agreement_id' => $agreement_id,
         ]);
+
+        // remove the pending task
+        $task->delete();
     }
     protected function directorStore($validatedData, $ngo_id, $agreement_id)
     {
