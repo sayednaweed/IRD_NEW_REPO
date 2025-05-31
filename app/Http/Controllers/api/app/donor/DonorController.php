@@ -11,6 +11,7 @@ use App\Models\Contact;
 use App\Models\DonorTran;
 
 use App\Enums\LanguageEnum;
+use App\Enums\Status\StatusEnum;
 use App\Models\AddressTran;
 use Illuminate\Http\Request;
 
@@ -22,6 +23,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\app\donor\DonorRegisterRequest;
 use App\Http\Requests\app\donor\DonorUpdateRequest;
+use App\Models\DonorStatus;
 
 class DonorController extends Controller
 {
@@ -129,7 +131,16 @@ class DonorController extends Controller
                 'name' => $validatedData["name_{$name}"],
             ]);
         }
+        DonorStatus::create([
+            'donor_id' => $newDonor->id,
+            'is_active' => true,
+            'status_id' => StatusEnum::active->value,
+            'comment' =>   'Register the Donor',
+            'user_id' => $request->user()->id,
+        ]);
+
         $name = $validatedData['name_english'];
+
 
         if ($locale == 'fa') {
             $name = $validatedData['name_english'];
@@ -219,7 +230,7 @@ class DonorController extends Controller
 
         if (!$donor) {
             return response()->json([
-                'message' => __('app_translation.ngo_not_found'),
+                'message' => __('app_translation.donor_not_found'),
             ], 404, [], JSON_UNESCAPED_UNICODE);
         }
 
@@ -356,23 +367,54 @@ class DonorController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public function projectStatistics()
+    public function donorStatus($id)
     {
-        // $statistics = DB::select("
-        // SELECT
-        //  COUNT(*) AS count,
-        //     (SELECT COUNT(*) FROM ngos WHERE DATE(created_at) = CURDATE()) AS todayCount,
-        //     (SELECT COUNT(*) FROM ngos n JOIN ngo_statuses ns ON n.id = ns.ngo_id WHERE ns.status_id = ?) AS activeCount,
-        //  (SELECT COUNT(*) FROM ngos n JOIN ngo_statuses ns ON n.id = ns.ngo_id WHERE ns.status_id = ? AND ns.status_id != ? ) AS unRegisteredCount
-        // FROM ngos
-        //     ", [StatusEnum::registered->value, StatusEnum::registered->value, StatusEnum::block->value]);
-        // return response()->json([
-        //     'counts' => [
-        //         "count" => $statistics[0]->count,
-        //         "todayCount" => $statistics[0]->todayCount,
-        //         "activeCount" => $statistics[0]->activeCount,
-        //         "unRegisteredCount" =>  $statistics[0]->unRegisteredCount
-        //     ],
-        // ], 200, [], JSON_UNESCAPED_UNICODE);
+        $locale = App::getLocale();
+        $result = DB::table('donors as don')
+            ->where('don.id', '=', $id)
+            ->join('donor_statuses as dons', function ($join) {
+                $join->on('dons.donor_id', '=', 'don.id');
+                // ->where('ngs.is_active', true);
+            })
+            ->join('status_trans as st', function ($join) use ($locale) {
+                $join->on('st.status_id', '=', 'dons.status_id')
+                    ->where('st.language_name', $locale);
+            })
+            ->join('users as us', 'dons.user_id', '=', 'us.id')
+            ->select(
+                'don.id as donor_id',
+                'dons.id',
+                'dons.comment',
+                'dons.status_id',
+                'st.name',
+                'us.username',
+                'dons.is_active',
+                'dons.created_at',
+            )->get();
+
+        return response()->json([
+            'statuses' => $result,
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
+
+    public function donorStatistics()
+    {
+
+        $statistics = DB::select("
+        SELECT
+         COUNT(*) AS count,
+            (SELECT COUNT(*) FROM donors WHERE DATE(created_at) = CURDATE()) AS todayCount,
+            (SELECT COUNT(*) FROM donors don JOIN donor_statuses ds ON don.id = ds.donor_id WHERE ds.status_id = ?) AS activeCount,
+         (SELECT COUNT(*) FROM donors don JOIN donor_statuses ds ON don.id = ds.donor_id WHERE ds.status_id  = ? ) AS blockCount
+        FROM donors
+            ", [StatusEnum::active->value, StatusEnum::block->value]);
+        return response()->json([
+            'counts' => [
+                "count" => $statistics[0]->count,
+                "todayCount" => $statistics[0]->todayCount,
+                "activeCount" => $statistics[0]->activeCount,
+                "blockCount" =>  $statistics[0]->blockCount
+            ],
+        ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 }

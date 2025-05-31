@@ -1,9 +1,8 @@
 
 <?php
 
-use App\Http\Controllers\api\app\project\ProjectPdfController;
-use App\Http\Controllers\api\app\ProjectController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\api\app\projects\ProjectPdfController;
 
 
 
