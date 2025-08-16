@@ -21,6 +21,7 @@ Route::prefix('v1')->middleware(["multiAuthorized:" . 'ngo:api,user:api'])->grou
     Route::get('/projects/details/{id}', [ProjectEditController::class, 'details']);
     Route::put('/projects/details', [ProjectUpdateController::class, 'details']);
     Route::get('/projects/budget/{id}', [ProjectEditController::class, 'budget']);
+    Route::put('/projects/budget', [ProjectUpdateController::class, 'budget']);
     Route::get('/projects/organization/structure/{id}', [ProjectEditController::class, 'structure']);
     Route::get('/projects/checklist/{id}', [ProjectEditController::class, 'checklist']);
 });
